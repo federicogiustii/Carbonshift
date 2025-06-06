@@ -1,5 +1,4 @@
 import pika
-import time
 import json
 import requests
 
@@ -29,17 +28,26 @@ def consume_slot_queue(slot):
             request_data = json.loads(body)
             service_s_execute(slot, request_data)
         else:
-            break  # esce se la coda è vuota
+            break
 
     connection.close()
 
-def global_clock():
+def listen_to_ticks():
     global current_slot
-    while True:
-        print(f"🕒 SLOT ATTUALE: {current_slot}")
+    connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
+    channel = connection.channel()
+    channel.queue_declare(queue="tick_queue")
+
+    def on_tick(ch, method, properties, body):
+        global current_slot
+        tick_data = json.loads(body)
+        print(f"⏱️  [SERVICE] Ricevuto tick {tick_data['tick']} → Slot {current_slot}")
         consume_slot_queue(current_slot)
         current_slot = (current_slot + 1) % 5
-        time.sleep(10)
-        
+
+    channel.basic_consume(queue="tick_queue", on_message_callback=on_tick, auto_ack=True)
+    print("🎧 [SERVICE] In ascolto dei tick...")
+    channel.start_consuming()
+
 if __name__ == "__main__":
-    global_clock()
+    listen_to_ticks()
