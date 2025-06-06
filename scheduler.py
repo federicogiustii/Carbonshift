@@ -17,15 +17,23 @@ def consume_ingress_queue(channel):
     return messages
 
 def flush_to_slot_queues(channel, messages):
+    # 🔁 Exchange per slot topic
+    channel.exchange_declare(exchange="slot_exchange", exchange_type="topic")
+
     for data in messages:
         slot = random.randint(0, 4)
         strategy = carbon_shift_strategy()
         data["slot"] = slot
         data["strategy"] = strategy
 
-        slot_queue = f"slot_{slot}"
-        channel.queue_declare(queue=slot_queue)
-        channel.basic_publish(exchange="", routing_key=slot_queue, body=json.dumps(data))
+        routing_key = f"slot.{slot}"
+
+        # ✅ Pubblica sul topic exchange
+        channel.basic_publish(
+            exchange="slot_exchange",
+            routing_key=routing_key,
+            body=json.dumps(data)
+        )
 
         print(f"""✅ [SCHEDULER] Richiesta smistata:
     • Messaggio: {data["M"]}
