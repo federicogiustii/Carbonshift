@@ -36,7 +36,14 @@ def listen_to_ticks():
     global current_slot
     connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
     channel = connection.channel()
-    channel.queue_declare(queue="tick_queue")
+
+    # Dichiara exchange fanout tick_exchange
+    channel.exchange_declare(exchange="tick_exchange", exchange_type="fanout")
+    # Crea coda temporanea esclusiva per questo consumer
+    result = channel.queue_declare(queue="", exclusive=True)
+    queue_name = result.method.queue
+    # Bind coda temporanea all'exchange fanout
+    channel.queue_bind(exchange="tick_exchange", queue=queue_name)
 
     def on_tick(ch, method, properties, body):
         global current_slot
@@ -45,7 +52,7 @@ def listen_to_ticks():
         consume_slot_queue(current_slot)
         current_slot = (current_slot + 1) % 5
 
-    channel.basic_consume(queue="tick_queue", on_message_callback=on_tick, auto_ack=True)
+    channel.basic_consume(queue=queue_name, on_message_callback=on_tick, auto_ack=True)
     print("🎧 [SERVICE] In ascolto dei tick...")
     channel.start_consuming()
 
