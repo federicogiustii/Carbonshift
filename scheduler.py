@@ -21,7 +21,8 @@ def flush_to_slot_queues(channel, messages):
     channel.exchange_declare(exchange="slot_exchange", exchange_type="topic")
 
     for data in messages:
-        slot = random.randint(0, 4)
+        deadline = data.get("D", 4)  # prendi deadline, default 4 se mancante
+        slot = random.randint(0, deadline)
         strategy = carbon_shift_strategy()
         data["slot"] = slot
         data["strategy"] = strategy
