@@ -1,6 +1,6 @@
 # CarbonShift - Prototipo asincrono carbon-aware
 
-## 🧭 Obiettivo del sistema
+## Obiettivo del sistema
 
 Il prototipo implementa un sistema asincrono ispirato alla logica CarbonShift, che assegna dinamicamente richieste a slot temporali futuri e strategie di esecuzione, ottimizzando il compromesso tra:
 - Minimizzazione dell'impatto carbonico (emissioni CO₂)
@@ -9,7 +9,7 @@ Il prototipo implementa un sistema asincrono ispirato alla logica CarbonShift, c
 
 ---
 
-## 🧩 Componenti principali
+## Componenti principali
 
 ### 1. Client (`client.py`)
 - Invia richieste asincrone `(M, D, C)`:
@@ -45,7 +45,7 @@ Il prototipo implementa un sistema asincrono ispirato alla logica CarbonShift, c
 
 ---
 
-## 🗂️ File CSV di configurazione
+## File CSV di configurazione
 
 ### `strategies.csv`
 ```csv
@@ -78,15 +78,17 @@ sudo service rabbitmq-server start
 
 ### 2. Esegui i componenti
 ```bash
-python clock_master.py
+python frontend.py
 python scheduler.py
+python service_clock.py
+python clock_master.py
 python client_callback.py
 python client.py
 ```
 
 ---
 
-## 📦 Dipendenze
+## Dipendenze
 
 - Python 3.8+
 - Librerie:
@@ -98,6 +100,6 @@ pip install pika ortools
 
 ---
 
-## ✅ Stato
+## Stato
 
-✔️ Sistema asincrono, configurabile via CSV, fedele al modello CarbonShift (sia base che scalabile).
+✔️ Sistema asincrono, configurabile via CSV, fedele al modello CarbonShift.
