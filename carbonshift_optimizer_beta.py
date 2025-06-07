@@ -18,7 +18,7 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
     - assignment: dizionario {request_id: (slot, strategy_name)}
     '''
 
-    # 🎯 BLOCCO 1 - Divisione delle richieste in blocchi (β)
+    # BLOCCO 1 - Divisione delle richieste in blocchi (β)
     if beta is None or beta >= len(requests):
         # Versione base → ogni richiesta è un blocco separato
         blocks = [[req] for req in requests]
@@ -33,16 +33,16 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
     S = list(range(len(strategies)))          # Indici strategie
     T = list(range(delta))                    # Indici time slot
 
-    # 🔁 Mappatura richiesta → blocco
+    # Mappatura richiesta → blocco
     req_to_block = {}
     for b, group in enumerate(blocks):
         for req in group:
             req_to_block[req["id"]] = b
 
-    # 🔒 Vincolo: ogni blocco ha deadline = min delle deadline interne
+    # Vincolo: ogni blocco ha deadline = min delle deadline interne
     block_deadlines = [min(req["deadline"] for req in group) for group in blocks]
 
-    # 🔧 Variabili decisionali binarie: x[b,s,t] = 1 se blocco b è assegnato alla strategia s nello slot t
+    # Variabili decisionali binarie: x[b,s,t] = 1 se blocco b è assegnato alla strategia s nello slot t
     x = {}
     for b in B:
         for s in S:
@@ -51,11 +51,11 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
                 if t <= block_deadlines[b]:
                     x[(b, s, t)] = model.NewBoolVar(f"x_{b}_{s}_{t}")
 
-    # 🔒 Vincolo 1: ogni blocco deve essere assegnato ad una sola combinazione (slot, strategia)
+    # Vincolo 1: ogni blocco deve essere assegnato ad una sola combinazione (slot, strategia)
     for b in B:
         model.AddExactlyOne(x[(b, s, t)] for s in S for t in T if (b, s, t) in x)
 
-    # 🔒 Vincolo 2: errore medio totale ≤ epsilon * numero_blocchi
+    # Vincolo 2: errore medio totale ≤ epsilon * numero_blocchi
     # Regola: somma degli errori pesati per le strategie usate deve essere entro soglia
     total_error_expr = []
     for b in B:
@@ -65,7 +65,7 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
                     total_error_expr.append(x[(b, s, t)] * strategies[s]["error"])
     model.Add(sum(total_error_expr) <= epsilon * len(blocks))
 
-    # 🎯 Obiettivo: minimizzare somma(CO₂[t] * durata strategia s) su tutti i blocchi assegnati
+    # Obiettivo: minimizzare somma(CO₂[t] * durata strategia s) su tutti i blocchi assegnati
     objective_terms = []
     for b in B:
         for s in S:
@@ -76,7 +76,7 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
                     )
     model.Minimize(sum(objective_terms))
 
-    # 🧠 Risoluzione
+    # Risoluzione
     solver = cp_model.CpSolver()
     status = solver.Solve(model)
 
@@ -84,7 +84,7 @@ def assign_requests_carbonshift(requests, strategies, carbon_intensities, delta,
     if status not in [cp_model.OPTIMAL, cp_model.FEASIBLE]:
         raise RuntimeError("No feasible assignment found")
 
-    # ⏱️ Output finale: ogni richiesta eredita lo slot e la strategia assegnata al suo blocco
+    # Output finale: ogni richiesta eredita lo slot e la strategia assegnata al suo blocco
     assignment = {}
     for b in B:
         for s in S:
