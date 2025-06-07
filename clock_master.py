@@ -14,7 +14,7 @@ def clock_master(tick_interval=30):
         message = {"tick": tick_count}
         # Pubblica sul fanout exchange (routing_key vuota)
         channel.basic_publish(exchange="tick_exchange", routing_key="", body=json.dumps(message))
-        print(f"🕰️  [CLOCK] Tick {tick_count} inviato")
+        print(f"[CLOCK] Tick {tick_count} inviato")
         tick_count += 1
         time.sleep(tick_interval)
 
