@@ -69,7 +69,7 @@ beta,2
 
 ---
 
-## ▶️ Esecuzione
+## Esecuzione
 
 ### 1. Avvia RabbitMQ
 ```bash
