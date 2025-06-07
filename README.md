@@ -45,7 +45,7 @@ Il prototipo implementa un sistema asincrono ispirato alla logica CarbonShift, c
 
 ---
 
-## File CSV di configurazione
+## File CSV di configurazione (forniti come esempio)
 
 ### `strategies.csv`
 ```csv
