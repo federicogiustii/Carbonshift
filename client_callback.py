@@ -5,7 +5,7 @@ app = Flask(__name__)
 @app.route("/callback", methods=["POST"])
 def callback():
     data = request.json
-    print(f"""📬 [CLIENT] Callback ricevuta:
+    print(f"""[CLIENT] Callback ricevuta:
     • Echo: {data["echo"]}
     • Strategia: {data["strategy"]}
     • Slot eseguito: {data["slot_executed"]}
