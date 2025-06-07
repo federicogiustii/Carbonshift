@@ -98,8 +98,3 @@ python client.py
 pip install pika ortools
 ```
 
----
-
-## Stato
-
-✔️ Sistema asincrono, configurabile via CSV, fedele al modello CarbonShift.
