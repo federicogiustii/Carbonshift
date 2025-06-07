@@ -1,7 +1,33 @@
+
 import pika
 import json
 import random
+import csv
 from carbonshift_optimizer_beta import assign_requests_carbonshift
+
+def load_strategies_csv(path="strategies.csv"):
+    strategies = []
+    with open(path, newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            strategies.append({
+                "name": row["name"],
+                "error": int(row["error"]),
+                "duration": int(row["duration"])
+            })
+    return strategies
+
+def load_carbon_intensities_csv(path="co2.csv"):
+    with open(path, "r") as f:
+        return [int(val.strip()) for val in f.readline().split(",")]
+
+def load_scheduler_config_csv(path="scheduler_config.csv"):
+    config = {}
+    with open(path, newline="") as csvfile:
+        reader = csv.DictReader(csvfile)
+        for row in reader:
+            config[row["parameter"]] = int(row["value"])
+    return config
 
 def carbon_shift_strategy():
     return random.choice(["low", "medium", "high"])
@@ -21,18 +47,18 @@ def flush_to_slot_queues(channel, messages):
     # 🔁 Exchange per slot topic
     channel.exchange_declare(exchange="slot_exchange", exchange_type="topic")
 
-    # Parametri statici per Carbonshift (da rendere dinamici in prod)
-    delta = 5
-    epsilon = 3
-    beta = 2  
-    carbon_intensities = [100, 75, 120, 110, 70]
-    strategies = [
-        {'name': 'low', 'error': 6, 'duration': 1},
-        {'name': 'medium', 'error': 4, 'duration': 15},
-        {'name': 'high', 'error': 0, 'duration': 20}
-    ]
+    # Carica parametri da CSV
+    strategies = load_strategies_csv("strategies.csv")
+    carbon_intensities = load_carbon_intensities_csv("co2.csv")
+    config = load_scheduler_config_csv("scheduler_config.csv")
+
+    delta = len(carbon_intensities)
+    epsilon = config.get("epsilon", 3)
+    beta = config.get("beta", len(messages))
+
     requests = [{'id': i, 'deadline': msg.get('D', 4)} for i, msg in enumerate(messages)]
-    assignment = assign_requests_carbonshift(requests, strategies, carbon_intensities, delta, epsilon)
+    assignment = assign_requests_carbonshift(requests, strategies, carbon_intensities, delta, epsilon, beta)
+
     for i, data in enumerate(messages):
         deadline = data.get("D", 4)  # prendi deadline, default 4 se mancante
         slot, strategy = assignment[i]
