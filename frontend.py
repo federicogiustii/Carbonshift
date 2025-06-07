@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route("/request", methods=["POST"])
 def handle_request():
     data = request.json
-    print(f"📨 [FRONTEND] Richiesta ricevuta: {data}")
+    print(f"[FRONTEND] Richiesta ricevuta: {data}")
     try:
         connection = pika.BlockingConnection(pika.ConnectionParameters("localhost"))
         channel = connection.channel()
@@ -16,7 +16,7 @@ def handle_request():
         connection.close()
         return "Richiesta ricevuta!", 200
     except Exception as e:
-        print(f"❌ Errore nel publish RabbitMQ: {e}")
+        print(f"Errore nel publish RabbitMQ: {e}")
         return "Errore nel publish", 500
 
 if __name__ == "__main__":
