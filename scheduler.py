@@ -44,7 +44,7 @@ def consume_ingress_queue(channel):
     return messages
 
 def flush_to_slot_queues(channel, messages):
-    # 🔁 Exchange per slot topic
+    # Exchange per slot topic
     channel.exchange_declare(exchange="slot_exchange", exchange_type="topic")
 
     # Carica parametri da CSV
@@ -67,14 +67,14 @@ def flush_to_slot_queues(channel, messages):
 
         routing_key = f"slot.{slot}"
 
-        # ✅ Pubblica sul topic exchange
+        # Pubblica sul topic exchange
         channel.basic_publish(
             exchange="slot_exchange",
             routing_key=routing_key,
             body=json.dumps(data)
         )
 
-        print(f"""✅ [SCHEDULER] Richiesta smistata:
+        print(f"""[SCHEDULER] Richiesta smistata:
     • Messaggio: {data["M"]}
     • Strategia: {strategy}
     • Slot assegnato: {slot}
@@ -96,15 +96,15 @@ def listen_for_ticks():
 
     def on_tick(ch, method, properties, body):
         tick = json.loads(body)["tick"]
-        print(f"⏰ [SCHEDULER] Tick ricevuto: {tick}")
+        print(f"[SCHEDULER] Tick ricevuto: {tick}")
         requests = consume_ingress_queue(channel)
         if requests:
-            print(f"📦 [SCHEDULER] Prelevo {len(requests)} richieste da 'ingress_queue'")
+            print(f"[SCHEDULER] Prelevo {len(requests)} richieste da 'ingress_queue'")
             flush_to_slot_queues(channel, requests)
         else:
-            print("💤 [SCHEDULER] Nessuna richiesta da elaborare.")
+            print("[SCHEDULER] Nessuna richiesta da elaborare.")
 
-    print("⏱️ [SCHEDULER] In ascolto dei tick...")
+    print("[SCHEDULER] In ascolto dei tick...")
     channel.basic_consume(queue=queue_name, on_message_callback=on_tick, auto_ack=True)
     channel.start_consuming()
 
