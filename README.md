@@ -1,5 +1,4 @@
-# CarbonShift - Prototipo asincrono carbon-aware
-
+# CarbonShift - Prototipo asincrono carbon-aware (versione echo)
 ## Obiettivo del sistema
 
 Il prototipo implementa un sistema asincrono ispirato alla logica CarbonShift, che assegna dinamicamente richieste a slot temporali futuri e strategie di esecuzione, ottimizzando il compromesso tra:
